@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173b65">
+  <meta name="description" content="Horarios semanales y control de horas trabajadas.">
+  <title>Control de funcionarios</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="header"><div class="identity"><div class="bird" aria-label="Paloma">🕊️</div><div><small>GESTIÓN DE PERSONAL</small><h1>¡Hola, Mildre!</h1></div></div><span id="staffCount" class="count">0 funcionarios</span></header>
+    <nav class="tabs" aria-label="Secciones"><button type="button" data-tab="funcionarios" class="selected">Funcionarios</button><button type="button" data-tab="horas">Horas trabajadas</button></nav>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <section id="funcionarios" class="grid" aria-label="Funcionarios">
+      <form id="employeeForm" class="panel editor"><div class="heading"><small>01 / FICHA</small><h2 id="formTitle">Nuevo funcionario</h2></div><label class="field">Nombre y apellido<input id="employeeName" maxlength="100" required placeholder="Ej. María Rodríguez" autocomplete="off"></label><div class="subheading"><strong>Horario semanal</strong><span>24 horas · HH:MM</span></div><div id="scheduleFields"></div><div class="actions"><button id="saveEmployee" class="primary" type="submit">Agregar funcionario</button><button id="cancelEdit" class="secondary" type="button" hidden>Cancelar</button></div></form>
+      <section class="panel roster"><div class="heading"><small>02 / PLANTEL</small><h2>Funcionarios registrados <span id="rosterCount" class="pill">0</span></h2></div><div id="rosterList"></div></section>
+    </section>
+    <section id="horas" class="hours-view" aria-label="Horas trabajadas" hidden><div class="hours-header"><div><small>REGISTRO DIARIO</small><h2>Horas trabajadas</h2><p>Ingresá la hora real de entrada y salida. El saldo se calcula con el turno pautado para ese día.</p></div><label class="date-field">Fecha<input id="workDate" type="date" required></label></div><div class="summary"><div><strong id="scheduledTotal">0 h 00 min</strong><span>Pautadas</span></div><div><strong id="workedTotal">0 h 00 min</strong><span>Trabajadas</span></div><div><strong id="balanceTotal">0 h 00 min</strong><span>Saldo registrado</span></div></div><div id="timesheet" class="panel timesheet"></div></section>
+    <footer><span>Los datos se guardan en este navegador.</span><div><button id="exportData" type="button">Descargar respaldo</button><label class="import-label">Importar respaldo<input id="importData" type="file" accept="application/json,.json" hidden></label></div></footer>
+  </main>
+</body>
+</html>
