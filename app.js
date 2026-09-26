@@ -37,13 +37,14 @@
     }
     return schedule;
   }
-  function clearEdit() { editId=null; $('employeeName').value=''; $('formTitle').textContent='Nuevo funcionario'; $('saveEmployee').textContent='Agregar funcionario'; $('cancelEdit').hidden=true; drawSchedule(); }
+  function clearEdit() { editId=null; $('employeeName').value=''; $('employeeNumber').value=''; $('formTitle').textContent='Nuevo funcionario'; $('saveEmployee').textContent='Agregar funcionario'; $('cancelEdit').hidden=true; drawSchedule(); }
   $('employeeForm').addEventListener('submit', (event) => {
-    event.preventDefault(); const name=$('employeeName').value.trim(), schedule=readSchedule();
-    if (!name || !schedule) return;
+    event.preventDefault(); const name=$('employeeName').value.trim(), number=$('employeeNumber').value.trim(), schedule=readSchedule();
+    if (!name || !number || !schedule) return;
+    if (data.employees.some((employee)=>employee.id!==editId && employee.number===number)) { notice('Ese número de identificación ya pertenece a otro funcionario.'); return; }
     const previous=JSON.stringify(data);
-    if (editId) { const item=data.employees.find((employee)=>employee.id===editId); if(item) Object.assign(item,{name,schedule}); }
-    else data.employees.push({id:crypto.randomUUID(),name,schedule});
+    if (editId) { const item=data.employees.find((employee)=>employee.id===editId); if(item) Object.assign(item,{name,number,schedule}); }
+    else data.employees.push({id:crypto.randomUUID(),name,number,schedule});
     if (!save()) { data=JSON.parse(previous); return; }
     notice(''); clearEdit(); render();
   });
@@ -51,12 +52,12 @@
   function renderRoster() {
     const count=data.employees.length; $('staffCount').textContent=`${count} ${count===1?'funcionario':'funcionarios'}`; $('rosterCount').textContent=count;
     const items=[...data.employees].sort((a,b)=>a.name.localeCompare(b.name,'es'));
-    $('rosterList').innerHTML = items.length ? items.map((item)=>`<article class="staff-card" data-id="${escape(item.id)}"><div class="person"><span class="avatar">${escape(item.name.trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()).join(''))}</span><div><h3>${escape(item.name)}</h3><small>${days.filter(([day])=>item.schedule?.[day]).length} días asignados</small></div></div><div class="mini-grid">${days.map(([day,label])=>`<div><small>${label.slice(0,3)}</small><strong>${item.schedule?.[day] ? `${escape(item.schedule[day].start)}–${escape(item.schedule[day].end)}` : 'Libre'}</strong></div>`).join('')}</div><div class="card-actions"><button type="button" data-action="edit">Editar</button><button type="button" data-action="delete" class="delete">Eliminar</button></div></article>`).join('') : '<p class="empty"><strong>Aún no hay funcionarios</strong>Completá la ficha para empezar.</p>';
+    $('rosterList').innerHTML = items.length ? items.map((item)=>`<article class="staff-card" data-id="${escape(item.id)}"><div class="person"><span class="avatar">${escape(item.name.trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()).join(''))}</span><div><h3>${escape(item.name)}</h3><small>${item.number ? `N.º ${escape(item.number)} · ` : ''}${days.filter(([day])=>item.schedule?.[day]).length} días asignados</small></div></div><div class="mini-grid">${days.map(([day,label])=>`<div><small>${label.slice(0,3)}</small><strong>${item.schedule?.[day] ? `${escape(item.schedule[day].start)}–${escape(item.schedule[day].end)}` : 'Libre'}</strong></div>`).join('')}</div><div class="card-actions"><button type="button" data-action="edit">Editar</button><button type="button" data-action="delete" class="delete">Eliminar</button></div></article>`).join('') : '<p class="empty"><strong>Aún no hay funcionarios</strong>Completá la ficha para empezar.</p>';
   }
   $('rosterList').addEventListener('click', (event) => {
     const button=event.target.closest('button[data-action]'); if (!button) return;
     const id=button.closest('.staff-card').dataset.id, item=data.employees.find(e=>e.id===id); if (!item) return;
-    if (button.dataset.action==='edit') { editId=id; $('employeeName').value=item.name; $('formTitle').textContent='Editar funcionario'; $('saveEmployee').textContent='Guardar cambios'; $('cancelEdit').hidden=false; drawSchedule(item.schedule); window.scrollTo({top:0,behavior:'smooth'}); }
+    if (button.dataset.action==='edit') { editId=id; $('employeeName').value=item.name; $('employeeNumber').value=item.number||''; $('formTitle').textContent='Editar funcionario'; $('saveEmployee').textContent='Guardar cambios'; $('cancelEdit').hidden=false; drawSchedule(item.schedule); window.scrollTo({top:0,behavior:'smooth'}); }
     else if (confirm(`¿Eliminar a ${item.name} y sus registros de horas?`)) {
       data.employees=data.employees.filter(e=>e.id!==id);
       for (const entries of Object.values(data.records)) delete entries[id];
@@ -74,7 +75,7 @@
       const delta=actual === null ? null : actual-(expected||0);
       if(actual!==null){workedTotal+=actual;balanceTotal+=delta;}
       const className=delta===null?'':delta>0?'positive':delta<0?'negative':'';
-      return `<div class="shift-entry" data-id="${escape(item.id)}"><div><h3>${escape(item.name)}</h3><span class="hint">${shift?'Turno pautado':'Sin turno pautado'}</span></div><span class="planned">${shift?`${escape(shift.start)} a ${escape(shift.end)}`:'Libre'}</span><div class="actual-pair"><label>Entrada real<input type="time" class="actual-time actual-start" value="${escape(record?.start||'')}"></label><label>Salida real<input type="time" class="actual-time actual-end" value="${escape(record?.end||'')}"></label></div><span class="balance ${className}">${delta===null?'Sin registrar':balanceText(delta)}</span></div>`;
+      return `<div class="shift-entry" data-id="${escape(item.id)}"><div><h3>${escape(item.name)}</h3><span class="hint">${item.number ? `N.º ${escape(item.number)} · ` : ''}${shift?'Turno pautado':'Sin turno pautado'}</span></div><span class="planned">${shift?`${escape(shift.start)} a ${escape(shift.end)}`:'Libre'}</span><div class="actual-pair"><label>Entrada real<input type="time" class="actual-time actual-start" value="${escape(record?.start||'')}"></label><label>Salida real<input type="time" class="actual-time actual-end" value="${escape(record?.end||'')}"></label></div><span class="balance ${className}">${delta===null?'Sin registrar':balanceText(delta)}</span></div>`;
     }).join('') : '<p class="empty"><strong>Sin funcionarios</strong>Agregá funcionarios en la primera pestaña.</p>';
     $('scheduledTotal').textContent=format(plannedTotal);$('workedTotal').textContent=format(workedTotal);$('balanceTotal').textContent=balanceText(balanceTotal);
     $('balanceTotal').className=balanceTotal>0?'positive':balanceTotal<0?'negative':'';
