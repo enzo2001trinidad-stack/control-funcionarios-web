@@ -7,19 +7,20 @@
   <meta name="description" content="Horarios semanales y control de horas trabajadas.">
   <title>Control de funcionarios</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="app.js?v=2"></script>
+  <link rel="stylesheet" href="styles.css?v=3">
+  <script defer src="app.js?v=3"></script>
 </head>
 <body>
   <main class="shell">
     <header class="header"><div class="identity"><div class="bird" aria-label="Paloma">🕊️</div><div><small>GESTIÓN DE PERSONAL</small><h1>¡Hola, Mildre!</h1></div></div><span id="staffCount" class="count">0 funcionarios</span></header>
-    <nav class="tabs" aria-label="Secciones"><button type="button" data-tab="funcionarios" class="selected">Funcionarios</button><button type="button" data-tab="horas">Horas trabajadas</button></nav>
+    <nav class="tabs" aria-label="Secciones"><button type="button" data-tab="funcionarios" class="selected">Funcionarios</button><button type="button" data-tab="horas">Horas trabajadas</button><button type="button" data-tab="saldos">Saldos</button></nav>
     <div id="notice" class="notice" role="status" hidden></div>
     <section id="funcionarios" class="grid" aria-label="Funcionarios">
       <form id="employeeForm" class="panel editor"><div class="heading"><small>01 / FICHA</small><h2 id="formTitle">Nuevo funcionario</h2></div><label class="field">Nombre y apellido<input id="employeeName" maxlength="100" required placeholder="Ej. María Rodríguez" autocomplete="off"></label><label class="field">Número de identificación<input id="employeeNumber" type="text" inputmode="numeric" maxlength="32" required placeholder="Ej. 1024" autocomplete="off"></label><div class="subheading"><strong>Horario semanal</strong><span>24 horas · HH:MM</span></div><div id="scheduleFields"></div><div class="actions"><button id="saveEmployee" class="primary" type="submit">Agregar funcionario</button><button id="cancelEdit" class="secondary" type="button" hidden>Cancelar</button></div></form>
-      <section class="panel roster"><div class="heading"><small>02 / PLANTEL</small><h2>Funcionarios registrados <span id="rosterCount" class="pill">0</span></h2></div><div id="rosterList"></div></section>
+      <section class="panel roster"><div class="heading"><small>02 / PLANTEL</small><h2>Funcionarios registrados <span id="rosterCount" class="pill">0</span></h2></div><label class="search-field">Buscar por nombre o ID<input id="rosterSearch" type="search" placeholder="Nombre o número de identificación" autocomplete="off"></label><div id="rosterList"></div></section>
     </section>
-    <section id="horas" class="hours-view" aria-label="Horas trabajadas" hidden><div class="hours-header"><div><small>REGISTRO DIARIO</small><h2>Horas trabajadas</h2><p>Ingresá la hora real de entrada y salida. El saldo se calcula con el turno pautado para ese día.</p></div><label class="date-field">Fecha<input id="workDate" type="date" required></label></div><div class="summary"><div><strong id="scheduledTotal">0 h 00 min</strong><span>Pautadas</span></div><div><strong id="workedTotal">0 h 00 min</strong><span>Trabajadas</span></div><div><strong id="balanceTotal">0 h 00 min</strong><span>Saldo registrado</span></div></div><div id="timesheet" class="panel timesheet"></div></section>
+    <section id="horas" class="hours-view" aria-label="Horas trabajadas" hidden><div class="hours-header"><div><small>REGISTRO DIARIO</small><h2>Horas trabajadas</h2><p>Agregá uno o más tramos de entrada y salida. Guardá el registro para calcular el saldo de ese día.</p></div><label class="date-field">Fecha<input id="workDate" type="date" required></label></div><label class="search-field">Buscar funcionario por nombre o ID<input id="hoursSearch" type="search" placeholder="Nombre o número de identificación" autocomplete="off"></label><div class="summary"><div><strong id="scheduledTotal">0 h 00 min</strong><span>Pautadas</span></div><div><strong id="workedTotal">0 h 00 min</strong><span>Trabajadas registradas</span></div><div><strong id="balanceTotal">0 h 00 min</strong><span>Saldo registrado</span></div></div><div id="timesheet" class="panel timesheet"></div></section>
+    <section id="saldos" class="hours-view" aria-label="Saldos" hidden><div class="hours-header"><div><small>RESUMEN DE HORAS</small><h2>Saldos por funcionario</h2><p>Los totales del mes y del año incluyen solo los días con asistencia registrada. Los horarios pautados se calculan con la programación actual.</p></div><label class="date-field">Día de referencia<input id="balanceDate" type="date"></label></div><label class="search-field">Buscar funcionario por nombre o ID<input id="balanceSearch" type="search" placeholder="Nombre o número de identificación" autocomplete="off"></label><div id="balanceList"></div></section>
     <footer><span>Los datos se guardan en este navegador.</span><div><button id="exportData" type="button">Descargar respaldo</button><label class="import-label">Importar respaldo<input id="importData" type="file" accept="application/json,.json" hidden></label></div></footer>
   </main>
 </body>
