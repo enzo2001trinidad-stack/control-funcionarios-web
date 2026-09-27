@@ -41,12 +41,12 @@
   function drawSchedule(schedule=freshSchedule()) {
     $('scheduleFields').innerHTML=days.map(([day,label])=>{
       const parts=intervals(schedule[day]);
-      return `<div class="day-row" data-day="${day}"><label class="day-switch"><input type="checkbox" class="day-check" ${parts.length?'checked':''}><span>${label}</span></label><div class="shift-fields">${parts.length ? parts.map(part=>pair(part)).join('')+'<button type="button" class="add-interval" data-action="add">+ Otro horario</button>' : '<span class="free">Libre</span>'}</div></div>`;
+      return `<div class="day-row" data-day="${day}"><label class="day-switch"><input type="checkbox" class="day-check" ${parts.length?'checked':''}><span>${label}</span></label><div class="shift-fields">${parts.length ? parts.map(part=>pair(part)).join('')+'<button type="button" class="add-interval" data-action="add">Agregar horario</button>' : '<span class="free">Libre</span>'}</div></div>`;
     }).join('');
   }
   $('scheduleFields').addEventListener('change',event=>{
     if(!event.target.matches('.day-check'))return;
-    event.target.closest('.day-row').querySelector('.shift-fields').innerHTML=event.target.checked ? pair({start:'08:00',end:'16:00'})+'<button type="button" class="add-interval" data-action="add">+ Otro horario</button>' : '<span class="free">Libre</span>';
+    event.target.closest('.day-row').querySelector('.shift-fields').innerHTML=event.target.checked ? pair({start:'08:00',end:'16:00'})+'<button type="button" class="add-interval" data-action="add">Agregar horario</button>' : '<span class="free">Libre</span>';
   });
   $('scheduleFields').addEventListener('click',event=>{
     const action=event.target.dataset.action, row=event.target.closest('.day-row'); if(!action || !row)return;
@@ -94,7 +94,7 @@
     $('timesheet').innerHTML=items.length ? items.map(item=>{
       const shifts=planned(item,date),expected=total(shifts),record=intervals(entries[item.id]),actual=record.length?total(record):null,delta=actual===null?null:actual-expected;
       plannedTotal+=expected;if(actual!==null){workedTotal+=actual;balanceTotal+=delta;}
-      return `<article class="shift-entry" data-id="${escape(item.id)}"><div><h3>${escape(item.name)}</h3><span class="hint">${item.number?`N.º ${escape(item.number)} · `:''}${shifts.length?'Turno pautado':'Sin turno pautado'}</span></div><div class="planned">${shiftsText(shifts)}<small>${format(expected)} pautadas</small></div><div class="actual-fields">${record.map(part=>pair(part,'actual')).join('')}<button type="button" class="add-interval" data-action="add">+ Otro horario</button></div><div class="entry-actions"><button type="button" class="secondary" data-action="save">Guardar</button><span class="balance ${delta===null?'':signedClass(delta)}">${delta===null?'Sin registrar':signed(delta)}</span></div><label class="note-field">Notas<textarea class="attendance-note" rows="2" maxlength="1000" placeholder="Observaciones de este funcionario en esta fecha">${escape(entries[item.id]?.note||'')}</textarea></label></article>`;
+      return `<article class="shift-entry" data-id="${escape(item.id)}"><div><h3>${escape(item.name)}</h3><span class="hint">${item.number?`N.º ${escape(item.number)} · `:''}${shifts.length?'Turno pautado':'Sin turno pautado'}</span></div><div class="planned">${shiftsText(shifts)}<small>${format(expected)} pautadas</small></div><div class="actual-fields">${record.map(part=>pair(part,'actual')).join('')}<button type="button" class="add-interval" data-action="add">Agregar horario</button></div><div class="entry-actions"><button type="button" class="secondary" data-action="save">Guardar</button><span class="balance ${delta===null?'':signedClass(delta)}">${delta===null?'Sin registrar':signed(delta)}</span></div><label class="note-field">Notas<textarea class="attendance-note" rows="2" maxlength="1000" placeholder="Observaciones de este funcionario en esta fecha">${escape(entries[item.id]?.note||'')}</textarea></label></article>`;
     }).join('') : `<p class="empty"><strong>${data.employees.length?'Sin coincidencias':'Sin funcionarios'}</strong>${data.employees.length?'Probá con otro nombre o número.':'Agregá funcionarios en la primera pestaña.'}</p>`;
     $('scheduledTotal').textContent=format(plannedTotal);$('workedTotal').textContent=format(workedTotal);$('balanceTotal').textContent=signed(balanceTotal);$('balanceTotal').className=signedClass(balanceTotal);
   }
