@@ -7,8 +7,8 @@
   <meta name="description" content="Horarios semanales y control de horas trabajadas.">
   <title>Control de funcionarios</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=6">
-  <script defer src="app.js?v=6"></script>
+  <link rel="stylesheet" href="styles.css?v=7">
+  <script defer src="app.js?v=7"></script>
 </head>
 <body>
   <main class="shell">
@@ -23,5 +23,6 @@
     <section id="saldos" class="hours-view" aria-label="Desglose de horas" hidden><div class="hours-header"><div><small>RESUMEN DE HORAS</small><h2>Desglose de horas por funcionario</h2><p>Consultá cuánto debe o le sobra a cada persona por día y por mes. Se suman solo los días con asistencia registrada, usando los horarios pautados actuales.</p></div><label class="date-field">Día de referencia<input id="balanceDate" type="date"></label></div><label class="search-field">Buscar funcionario por nombre o ID<input id="balanceSearch" type="search" placeholder="Nombre o número de identificación" autocomplete="off"></label><div id="balanceList"></div></section>
     <footer><span>Los datos se guardan en este navegador.</span><div><button id="exportData" type="button">Descargar respaldo</button><label class="import-label">Importar respaldo<input id="importData" type="file" accept="application/json,.json" hidden></label></div></footer>
   </main>
+  <section id="printReport" aria-label="Historial para imprimir"></section>
 </body>
 </html>
