@@ -7,7 +7,7 @@
   const freshSchedule = () => Object.fromEntries(days.map(([day]) => [day, null]));
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
   const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  const intervals = value => Array.isArray(value) ? value : value && typeof value === 'object' && value.start && value.end ? [value] : [];
+  const intervals = value => Array.isArray(value) ? value : value && Array.isArray(value.shifts) ? value.shifts : value && typeof value === 'object' && value.start && value.end ? [value] : [];
   const clock = value => { const [h,m] = value.split(':').map(Number); return h*60+m; };
   const duration = (start,end) => !timePattern.test(start) || !timePattern.test(end) || start===end ? null : (clock(end)-clock(start)+1440)%1440;
   const total = value => intervals(value).reduce((sum,part) => sum + (duration(part.start,part.end)||0),0);
@@ -94,7 +94,7 @@
     $('timesheet').innerHTML=items.length ? items.map(item=>{
       const shifts=planned(item,date),expected=total(shifts),record=intervals(entries[item.id]),actual=record.length?total(record):null,delta=actual===null?null:actual-expected;
       plannedTotal+=expected;if(actual!==null){workedTotal+=actual;balanceTotal+=delta;}
-      return `<article class="shift-entry" data-id="${escape(item.id)}"><div><h3>${escape(item.name)}</h3><span class="hint">${item.number?`N.º ${escape(item.number)} · `:''}${shifts.length?'Turno pautado':'Sin turno pautado'}</span></div><div class="planned">${shiftsText(shifts)}<small>${format(expected)} pautadas</small></div><div class="actual-fields">${record.map(part=>pair(part,'actual')).join('')}<button type="button" class="add-interval" data-action="add">+ Otro horario</button></div><div class="entry-actions"><button type="button" class="secondary" data-action="save">Guardar</button><span class="balance ${delta===null?'':signedClass(delta)}">${delta===null?'Sin registrar':signed(delta)}</span></div></article>`;
+      return `<article class="shift-entry" data-id="${escape(item.id)}"><div><h3>${escape(item.name)}</h3><span class="hint">${item.number?`N.º ${escape(item.number)} · `:''}${shifts.length?'Turno pautado':'Sin turno pautado'}</span></div><div class="planned">${shiftsText(shifts)}<small>${format(expected)} pautadas</small></div><div class="actual-fields">${record.map(part=>pair(part,'actual')).join('')}<button type="button" class="add-interval" data-action="add">+ Otro horario</button></div><div class="entry-actions"><button type="button" class="secondary" data-action="save">Guardar</button><span class="balance ${delta===null?'':signedClass(delta)}">${delta===null?'Sin registrar':signed(delta)}</span></div><label class="note-field">Notas<textarea class="attendance-note" rows="2" maxlength="1000" placeholder="Observaciones de este funcionario en esta fecha">${escape(entries[item.id]?.note||'')}</textarea></label></article>`;
     }).join('') : `<p class="empty"><strong>${data.employees.length?'Sin coincidencias':'Sin funcionarios'}</strong>${data.employees.length?'Probá con otro nombre o número.':'Agregá funcionarios en la primera pestaña.'}</p>`;
     $('scheduledTotal').textContent=format(plannedTotal);$('workedTotal').textContent=format(workedTotal);$('balanceTotal').textContent=signed(balanceTotal);$('balanceTotal').className=signedClass(balanceTotal);
   }
@@ -104,9 +104,9 @@
     if(action==='add'){button.insertAdjacentHTML('beforebegin',pair({},'actual'));return;}
     if(action==='remove'){button.closest('.clock-pair').remove();return;}
     if(action==='save'){
-      const parts=readPairs(row,'actual');if(parts.length){const error=validate(parts);if(error){notice(error);return;}}
+      const parts=readPairs(row,'actual'),note=row.querySelector('.attendance-note').value.trim();if(parts.length){const error=validate(parts);if(error){notice(error);return;}}
       const date=$('workDate').value,previous=JSON.stringify(data);data.records[date]||={};
-      if(parts.length)data.records[date][row.dataset.id]=parts;else delete data.records[date][row.dataset.id];
+      if(parts.length||note)data.records[date][row.dataset.id]={shifts:parts,note};else delete data.records[date][row.dataset.id];
       if(!Object.keys(data.records[date]).length)delete data.records[date];
       if(!save()){data=JSON.parse(previous);return;}
       notice('');renderHours();renderBalances();
